@@ -28,11 +28,9 @@ behavior: {
     jQuery.fn.ganttView = function () {
     	
     	var args = Array.prototype.slice.call(arguments);
-    	
     	if (args.length == 1 && typeof(args[0]) == "object") {
         	build.call(this, args[0]);
     	}
-    	
     	if (args.length == 2 && typeof(args[0]) == "string") {
     		handleMethod.call(this, args[0], args[1]);
     	}
@@ -66,9 +64,10 @@ behavior: {
 			
 			var minDays = Math.floor((opts.slideWidth / opts.cellWidth)  + 5);
 			var startEnd = DateUtils.getBoundaryDatesFromData(opts.data, minDays);
+			//startEnd received array [start,end] are moment obj.
 			opts.start = startEnd[0];
 			opts.end = startEnd[1];
-			
+
 	        els.each(function () {
 
 	            var container = jQuery(this);
@@ -107,7 +106,7 @@ behavior: {
                 "css": { "width": opts.slideWidth + "px" }
             });
 			
-            dates = getDates(opts.start, opts.end);
+            var dates = getDates(opts.start, opts.end);
             addHzHeader(slideDiv, dates, opts.cellWidth);
             addGrid(slideDiv, opts.data, dates, opts.cellWidth, opts.showWeekends);
             addBlockContainers(slideDiv, opts.data);
@@ -120,18 +119,20 @@ behavior: {
 
 		// Creates a 3 dimensional array [year][month][day] of every day 
 		// between the given start and end dates
+		// @start,end : moment obj
         function getDates(start, end) {
             var dates = [];
-			dates[start.getFullYear()] = [];
-			dates[start.getFullYear()][start.getMonth()] = [start]
+			dates[start.year()] = [];
+			dates[start.year()][start.month()] = [start]
 			var last = start;
-			while (last.compareTo(end) == -1) {
-				var next = last.clone().addDays(1);
-				if (!dates[next.getFullYear()]) { dates[next.getFullYear()] = []; }
-				if (!dates[next.getFullYear()][next.getMonth()]) { 
-					dates[next.getFullYear()][next.getMonth()] = []; 
+			//while (last.compareTo(end) == -1) {
+			while (last.isBefore(end)) {
+				var next = last.clone().add(1,'days');
+				if (!dates[next.year()]) { dates[next.year()] = []; }
+				if (!dates[next.year()][next.month()]) {
+					dates[next.year()][next.month()] = [];
 				}
-				dates[next.getFullYear()][next.getMonth()].push(next);
+				dates[next.year()][next.month()].push(next);
 				last = next;
 			}
 			return dates;
@@ -171,7 +172,7 @@ behavior: {
 					}).append(monthNames[m] + "/" + y));
 					for (var d in dates[y][m]) {
 						daysDiv.append(jQuery("<div>", { "class": "ganttview-hzheader-day" })
-							.append(dates[y][m][d].getDate()));
+							.append(dates[y][m][d].date()));
 					}
 				}
 			}
@@ -222,8 +223,8 @@ behavior: {
             for (var i = 0; i < data.length; i++) {
                 for (var j = 0; j < data[i].series.length; j++) {
                     var series = data[i].series[j];
-                    var size = DateUtils.daysBetween(series.start, series.end) + 1;
-					var offset = DateUtils.daysBetween(start, series.start);
+					var size = DateUtils.daysBetween(moment(series.start.toString()), moment(series.end.toString())) + 1;
+					var offset = DateUtils.daysBetween(start, moment(series.start.toString()));
 					var block = jQuery("<div>", {
                         "class": "ganttview-block",
                         "title": series.name + ", " + size + " days",
@@ -274,13 +275,13 @@ behavior: {
             	bindBlockResize(div, opts.cellWidth, opts.start, opts.behavior.onResize); 
         	}
             
-            if (opts.behavior.draggable) { 
+            if (opts.behavior.draggable) {
             	bindBlockDrag(div, opts.cellWidth, opts.start, opts.behavior.onDrag); 
         	}
 		}
 
         function bindBlockClick(div, callback) {
-            jQuery("div.ganttview-block", div).live("click", function () {
+			jQuery(document,div).on("click","div.ganttview-block", function () {
                 if (callback) { callback(jQuery(this).data("block-data")); }
             });
         }
@@ -298,6 +299,7 @@ behavior: {
         }
         
         function bindBlockDrag(div, cellWidth, startDate, callback) {
+
         	jQuery("div.ganttview-block", div).draggable({
         		axis: "x", 
         		grid: [cellWidth, cellWidth],
@@ -316,13 +318,13 @@ behavior: {
 			
 			// Set new start date
 			var daysFromStart = Math.round(offset / cellWidth);
-			var newStart = startDate.clone().addDays(daysFromStart);
+			var newStart = startDate.clone().add(daysFromStart,'days');
 			block.data("block-data").start = newStart;
 
 			// Set new end date
         	var width = block.outerWidth();
 			var numberOfDays = Math.round(width / cellWidth) - 1;
-			block.data("block-data").end = newStart.clone().addDays(numberOfDays);
+			block.data("block-data").end = newStart.clone().add(numberOfDays,'days');
 			jQuery("div.ganttview-block-text", block).text(numberOfDays + 1);
 			
 			// Remove top and left properties to avoid incorrect block positioning,
@@ -349,35 +351,35 @@ behavior: {
     	
         daysBetween: function (start, end) {
             if (!start || !end) { return 0; }
-            start = Date.parse(start); end = Date.parse(end);
-            if (start.getYear() == 1901 || end.getYear() == 8099) { return 0; }
+            if (start.year() == 1901 || end.year() == 8099) { return 0; }
             var count = 0, date = start.clone();
-            while (date.compareTo(end) == -1) { count = count + 1; date.addDays(1); }
+			while (date.isBefore(end)) { count++ ; date.add(1,'days'); }
             return count;
         },
         
         isWeekend: function (date) {
-            return date.getDay() % 6 == 0;
+            return date.date() % 6 == 0;
         },
 
 		getBoundaryDatesFromData: function (data, minDays) {
-			var minStart = new Date(); maxEnd = new Date();
+			var minStart = moment(), maxEnd = minStart.clone();
 			for (var i = 0; i < data.length; i++) {
 				for (var j = 0; j < data[i].series.length; j++) {
-					var start = Date.parse(data[i].series[j].start);
-					var end = Date.parse(data[i].series[j].end)
+					var start 	= moment(data[i].series[j].start.toString());
+					var end 	= moment(data[i].series[j].end.toString());
 					if (i == 0 && j == 0) { minStart = start; maxEnd = end; }
-					if (minStart.compareTo(start) == 1) { minStart = start; }
-					if (maxEnd.compareTo(end) == -1) { maxEnd = end; }
+					// adjust range
+					if (minStart.isAfter(start)) { minStart = start; }
+					if (maxEnd.isBefore(end)) { maxEnd = end; }
 				}
 			}
 			
 			// Insure that the width of the chart is at least the slide width to avoid empty
 			// whitespace to the right of the grid
 			if (DateUtils.daysBetween(minStart, maxEnd) < minDays) {
-				maxEnd = minStart.clone().addDays(minDays);
+				maxEnd = minStart.clone().add(minDays,'days');
 			}
-			
+			// moment obj
 			return [minStart, maxEnd];
 		}
     };

@@ -2,9 +2,9 @@ jQuery.ganttView
 ================
 
 The jQuery.ganttView plugin is a very lightweight plugin for creating a Gantt chart in plain HTML...no vector graphics or images required.  The plugin supports dragging and resizing the Gantt blocks and callbacks to trap the updated data.
+Original repository https://github.com/thegrubbsian/jquery.ganttView by thegrubbsian.
 
-[![Sample Gantt](https://raw.githubusercontent.com/thegrubbsian/jquery.ganttView/master/example/jquery-ganttview.png) A sample chart](http://thegrubbsian.github.io/jquery.ganttView/example/index.html)
-
+It supported jQuery 1.9 || 2.0 or higher. and date.js replaced to moment.js.
 
 Browser Compatibility
 ---------------------
@@ -15,34 +15,14 @@ Dependencies
 ------------
 The plugin depends on the following libraries:
 
-- jQuery 1.4 or higher (obviously)
+- jQuery 1.9, 2.0 or higher (obviously)
 - jQuery-UI 1.8 or higher
-- date.js
+- moment.js
 
 
 Documentation
 -------------
 Forthcoming...
-
-
-Contribution Guidelines
-------------
-The internal roadmap for the plugin is detailed in the project wiki. If you're interested in features outside of what's described there, we'd be interested to discuss pull requests that would add these features.  If you like the plugin, feel free to fork it and submit your patches back.
-
-**Guidelines:** If you'd like to offer a new feature please help us out by submitting the pull request with only the fewest changes necessary. 
-
-Ideal: Fork the project, apply just the individual changes to the individual files effected, submit pull request. 
-
-Those pull requests can usually be automatically merged and closed through the site here. 
-
-If your pull request includes things like:
-
-- changes to dependencies or where they're hosted
-- stylistic modifications
-- moving project files to different directories
-- more than one new feature / functional change
-
-one of us will have to do the work of carving out just the feature being pulled. Your request is likely to sit unmerged for a while if that's the case. 
 
 
 License
@@ -53,6 +33,7 @@ of the following license:
 The MIT License
 
 Copyright (c) 2010 JC Grubbs - jc.grubbs@devmynd.com
+Copyright (c) 2015 Hipsrinoky - info@pita-ri.jp
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
