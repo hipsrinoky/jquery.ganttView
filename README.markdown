@@ -33,6 +33,7 @@ of the following license:
 The MIT License
 
 Copyright (c) 2010 JC Grubbs - jc.grubbs@devmynd.com
+
 Copyright (c) 2015 Hipsrinoky - info@pita-ri.jp
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

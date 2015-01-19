@@ -41,6 +41,7 @@ behavior: {
     	var els = this;
         var defaults = {
             showWeekends: true,
+			showWeeks: true,
             cellWidth: 21,
             cellHeight: 31,
             slideWidth: 400,
@@ -49,7 +50,15 @@ behavior: {
             	clickable: true,
             	draggable: true,
             	resizable: true
-            }
+            },
+			dateFormat: {
+				year: "YYYY",
+				month: "MM",
+				day: "DD",
+				dow: ["S", "M", "T", "W", "T", "F", "S"],
+				ym: "YYYY-MM",
+				ymd: "YYYY-MM-DD"
+			}
         };
         
         var opts = jQuery.extend(true, defaults, options);
@@ -115,7 +124,7 @@ behavior: {
             applyLastClass(div.parent());
 		}
 		
-		var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+		//var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 		// Creates a 3 dimensional array [year][month][day] of every day 
 		// between the given start and end dates
@@ -125,7 +134,6 @@ behavior: {
 			dates[start.year()] = [];
 			dates[start.year()][start.month()] = [start]
 			var last = start;
-			//while (last.compareTo(end) == -1) {
 			while (last.isBefore(end)) {
 				var next = last.clone().add(1,'days');
 				if (!dates[next.year()]) { dates[next.year()] = []; }
@@ -140,6 +148,9 @@ behavior: {
 
         function addVtHeader(div, data, cellHeight) {
             var headerDiv = jQuery("<div>", { "class": "ganttview-vtheader" });
+			if(!opts.showWeeks){
+				headerDiv.addClass("ganttview-vtheader-no-weeks")
+			}
             for (var i = 0; i < data.length; i++) {
                 var itemDiv = jQuery("<div>", { "class": "ganttview-vtheader-item" });
                 itemDiv.append(jQuery("<div>", {
@@ -161,6 +172,7 @@ behavior: {
             var headerDiv = jQuery("<div>", { "class": "ganttview-hzheader" });
             var monthsDiv = jQuery("<div>", { "class": "ganttview-hzheader-months" });
             var daysDiv = jQuery("<div>", { "class": "ganttview-hzheader-days" });
+			var weeksDiv = jQuery("<div>", { "class": "ganttview-hzheader-weeks" });
             var totalW = 0;
 			for (var y in dates) {
 				for (var m in dates[y]) {
@@ -169,16 +181,25 @@ behavior: {
 					monthsDiv.append(jQuery("<div>", {
 						"class": "ganttview-hzheader-month",
 						"css": { "width": (w - 1) + "px" }
-					}).append(monthNames[m] + "/" + y));
+					}).append( moment([y,m]).format(opts.dateFormat.ym)));
 					for (var d in dates[y][m]) {
-						daysDiv.append(jQuery("<div>", { "class": "ganttview-hzheader-day" })
+						var wf = DateUtils.weekendClass(dates[y][m][d]);
+						daysDiv.append(jQuery("<div>", { "class": "ganttview-hzheader-day " + wf })
 							.append(dates[y][m][d].date()));
+						if(opts.showWeeks){
+							weeksDiv.append(jQuery("<div>", { "class": "ganttview-hzheader-week " + wf })
+								.append(opts.dateFormat.dow[dates[y][m][d].day()]));
+						}
 					}
 				}
 			}
             monthsDiv.css("width", totalW + "px");
             daysDiv.css("width", totalW + "px");
+			weeksDiv.css("width", totalW + "px");
             headerDiv.append(monthsDiv).append(daysDiv);
+			if(opts.showWeeks){
+				headerDiv.append(weeksDiv);
+			}
             div.append(headerDiv);
         }
 
@@ -188,10 +209,8 @@ behavior: {
 			for (var y in dates) {
 				for (var m in dates[y]) {
 					for (var d in dates[y][m]) {
-						var cellDiv = jQuery("<div>", { "class": "ganttview-grid-row-cell" });
-						if (DateUtils.isWeekend(dates[y][m][d]) && showWeekends) { 
-							cellDiv.addClass("ganttview-weekend"); 
-						}
+						var wf = DateUtils.weekendClass(dates[y][m][d]);
+						var cellDiv = jQuery("<div>", { "class": "ganttview-grid-row-cell " + wf });
 						rowDiv.append(cellDiv);
 					}
 				}
@@ -209,6 +228,9 @@ behavior: {
 
         function addBlockContainers(div, data) {
             var blocksDiv = jQuery("<div>", { "class": "ganttview-blocks" });
+			if( !opts.showWeeks ){
+				blocksDiv.addClass("ganttview-blocks-no-weeks");
+			}
             for (var i = 0; i < data.length; i++) {
                 for (var j = 0; j < data[i].series.length; j++) {
                     blocksDiv.append(jQuery("<div>", { "class": "ganttview-block-container" }));
@@ -357,8 +379,15 @@ behavior: {
             return count;
         },
         
-        isWeekend: function (date) {
-            return date.date() % 6 == 0;
+        weekendClass: function (date) {
+			var week = date.day();
+			if(week === 0){
+				return "ganttview-weekend-sun";
+			}else if(week === 6){
+				return "ganttview-weekend-sat";
+			}else{
+				return '';
+			}
         },
 
 		getBoundaryDatesFromData: function (data, minDays) {

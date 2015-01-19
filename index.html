@@ -30,6 +30,14 @@
 			$("#ganttChart").ganttView({
 				data: ganttData,
 				slideWidth: '100%',
+				dateFormat: {
+					year: "YYYY年",
+					month: "M月",
+					day: "D日",
+					dow: ["日", "月", "火", "水", "木", "金", "土"],
+					ym: "YYYY年M月",
+					ymd: "YYYY年M月D日"
+				},
 				behavior: {
 					onClick: function (data) { 
 						var msg = "You clicked on an event: { start: " + data.start.toString("M/d/yyyy") + ", end: " + data.end.toString("M/d/yyyy") + " }";
