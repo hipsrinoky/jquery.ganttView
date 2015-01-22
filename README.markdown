@@ -7,6 +7,7 @@ Original repository https://github.com/thegrubbsian/jquery.ganttView by thegrubb
 It supported jQuery 1.9 || 2.0 or higher. and date.js replaced to moment.js.
 
 ![Alt text](/example/jquery-ganttview.png?raw=true "ScreenShot")
+*ScreenShot in japanese.
 
 Browser Compatibility
 ---------------------
