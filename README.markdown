@@ -6,6 +6,8 @@ Original repository https://github.com/thegrubbsian/jquery.ganttView by thegrubb
 
 It supported jQuery 1.9 || 2.0 or higher. and date.js replaced to moment.js.
 
+![Alt text](/example/jquery-ganttview.png?raw=true "ScreenShot")
+
 Browser Compatibility
 ---------------------
 Currently the plugin has been tested, and is working in: FF 3.5+, Chrome 5+, Safari 4+, IE8+.  There are minor issues in IE7 and I haven't even attempted to use it in IE6.  If you encounter any issues with any version of Internet Explorer and would like to contribute CSS fixes please do so, several people have asked for IE6 support.
